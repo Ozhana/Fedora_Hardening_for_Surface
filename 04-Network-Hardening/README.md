@@ -1,36 +1,152 @@
 # 04 â€” AEGIS Network Hardening
 
-**Version:** `0.7.0-rc4`  
-**Tested on:** Fedora 44, Surface Pro 9, firewalld + nftables  
-**Arabic guide:** [README_AR.md](README_AR.md)
+**Version:** 0.7.0-rc4  
+**Validated on:** Fedora 44 â€” Surface Pro 9 â€” firewalld + nftables  
+**Arabic:** [README_AR.md](README_AR.md)
 
-AEGIS Network Hardening reduces unnecessary inbound network exposure. It replaces Fedora Workstation's broad default exposure with two controlled firewalld zones:
+> This layer reduces unnecessary inbound network exposure while preserving normal Internet access and common printer discovery/client traffic on the reviewed local connection.
 
-- `aegis-public` â€” restrictive fallback zone.
-- `aegis-lan` â€” selected local connection with printer discovery/client support.
+<table>
+<tr>
+<th width="50%">ENGLISH</th>
+<th width="50%">TÃœRKÃ‡E</th>
+</tr>
+<tr>
+<td valign="top">
 
-It removes inbound SSH, Samba/NetBIOS, and blanket TCP/UDP `1025-65535` allowances from the selected physical profile.
+## Start here
 
-> This layer is designed to be installed once and left in place. It does not need a permanent AEGIS service or daily `apply`.
+Fedora Workstation is designed to be convenient on many kinds of networks. A security-focused laptop may prefer a narrower inbound policy.
 
-## English
+AEGIS Network Hardening creates two clear trust levels:
 
-### 1. Before you start
+- **aegis-public** â€” restrictive fallback
+- **aegis-lan** â€” your reviewed physical connection, with printer discovery/client support
 
-Use this layer only if:
+It removes inbound SSH, Samba/NetBIOS, and blanket high-port allowances from the selected physical profile.
 
-- Fedora 44 is running normally.
-- `firewalld` and NetworkManager are active.
-- you have a local desktop/TTY session for recovery.
-- Docker is not active during `apply`.
+</td>
+<td valign="top">
 
-Important: inbound SSH and Samba sharing are intentionally not allowed by this policy. Printer discovery/client traffic is preserved.
+## Buradan baÅŸlayÄ±n
 
-### 2. Install
+Fedora Workstation birÃ§ok aÄŸda kolay kullanÄ±m iÃ§in tasarlanmÄ±ÅŸtÄ±r. GÃ¼venlik odaklÄ± bir dizÃ¼stÃ¼ bilgisayarda daha dar bir inbound politika tercih edilebilir.
 
-Open Terminal in this folder:
+AEGIS Network Hardening iki aÃ§Ä±k gÃ¼ven seviyesi oluÅŸturur:
 
-```bash
+- **aegis-public** â€” kÄ±sÄ±tlÄ± varsayÄ±lan/fallback bÃ¶lge
+- **aegis-lan** â€” incelenmiÅŸ fiziksel baÄŸlantÄ±nÄ±z; yazÄ±cÄ± keÅŸfi/istemci desteÄŸi korunur
+
+SeÃ§ilen fiziksel profilden inbound SSH, Samba/NetBIOS ve geniÅŸ yÃ¼ksek-port izinlerini kaldÄ±rÄ±r.
+
+</td>
+</tr>
+</table>
+
+## Mental model / Zihinsel model
+
+~~~mermaid
+flowchart TD
+    N["Network connection<br/>AÄŸ baÄŸlantÄ±sÄ±"] --> Q{"Reviewed physical profile?<br/>Ä°ncelenmiÅŸ fiziksel profil mi?"}
+    Q -->|"Yes / Evet"| L["aegis-lan<br/>Printer discovery/client allowed"]
+    Q -->|"No / HayÄ±r"| P["aegis-public<br/>Restrictive fallback"]
+    L --> F["firewalld + nftables"]
+    P --> F
+    F --> H["Your host<br/>BilgisayarÄ±nÄ±z"]
+~~~
+
+<table>
+<tr>
+<th width="50%">ENGLISH</th>
+<th width="50%">TÃœRKÃ‡E</th>
+</tr>
+<tr>
+<td valign="top">
+
+## What changes?
+
+The reviewed local profile keeps only a small set of client-side/discovery services needed for normal networking and printer discovery.
+
+The policy intentionally does **not** expose:
+
+- inbound SSH
+- Samba/NetBIOS sharing
+- blanket TCP/UDP 1025â€“65535
+- forwarding or masquerading by default
+
+It also enables a stricter DNAT gate and hardens selected redirect/source-route sysctls.
+
+</td>
+<td valign="top">
+
+## Neler deÄŸiÅŸir?
+
+Ä°ncelenmiÅŸ yerel profil, normal aÄŸ ve yazÄ±cÄ± keÅŸfi iÃ§in gereken kÃ¼Ã§Ã¼k bir istemci/keÅŸif servis kÃ¼mesini korur.
+
+Politika bilinÃ§li olarak ÅŸunlarÄ± **aÃ§maz**:
+
+- inbound SSH
+- Samba/NetBIOS paylaÅŸÄ±mÄ±
+- geniÅŸ TCP/UDP 1025â€“65535 aralÄ±ÄŸÄ±
+- varsayÄ±lan forwarding veya masquerade
+
+AyrÄ±ca daha sÄ±kÄ± DNAT kontrolÃ¼ aÃ§ar ve seÃ§ilmiÅŸ redirect/source-route sysctl'lerini sÄ±kÄ±laÅŸtÄ±rÄ±r.
+
+</td>
+</tr>
+</table>
+
+Expected LAN services / Beklenen LAN servisleri:
+
+~~~text
+dhcpv6-client
+ipp-client
+mdns
+ws-discovery-client
+~~~
+
+<table>
+<tr>
+<th width="50%">ENGLISH</th>
+<th width="50%">TÃœRKÃ‡E</th>
+</tr>
+<tr>
+<td valign="top">
+
+## Before installation
+
+Use this layer only when:
+
+- Fedora 44 is working normally
+- firewalld is active
+- NetworkManager is active
+- you have a local desktop/TTY session for recovery
+- Docker is not active during <code>apply</code>
+
+If you depend on inbound SSH or Samba sharing, read the plan carefully. Those services are intentionally not opened by this policy.
+
+</td>
+<td valign="top">
+
+## Kurulumdan Ã¶nce
+
+Bu katmanÄ± ÅŸu durumda kullanÄ±n:
+
+- Fedora 44 normal Ã§alÄ±ÅŸÄ±yor
+- firewalld aktif
+- NetworkManager aktif
+- kurtarma iÃ§in yerel masaÃ¼stÃ¼/TTY oturumunuz var
+- <code>apply</code> sÄ±rasÄ±nda Docker aktif deÄŸil
+
+Inbound SSH veya Samba paylaÅŸÄ±mÄ±na ihtiyacÄ±nÄ±z varsa planÄ± dikkatle okuyun. Bu politika bu servisleri bilinÃ§li olarak aÃ§maz.
+
+</td>
+</tr>
+</table>
+
+## Installation / Kurulum
+
+~~~bash
 sha256sum -c SHA256SUMS
 
 sudo install -d -o root -g root -m 0755 \
@@ -42,105 +158,388 @@ sudo install -o root -g root -m 0755 \
 
 sudo restorecon -RFv \
   /usr/local/libexec/aegis/network-hardening
-```
+~~~
 
-Set a short command variable:
+Create a short variable / KÄ±sa deÄŸiÅŸken:
 
-```bash
+~~~bash
 AEGIS_NET=/usr/local/libexec/aegis/network-hardening/aegis-network.sh
-```
+~~~
 
-Check the installed copy:
+Verify the installed copy / Kurulu kopyayÄ± doÄŸrulayÄ±n:
 
-```bash
+~~~bash
 /usr/bin/bash -p -- "$AEGIS_NET" verify-install
-```
+~~~
 
-### 3. First use
+<table>
+<tr>
+<th width="50%">ENGLISH</th>
+<th width="50%">TÃœRKÃ‡E</th>
+</tr>
+<tr>
+<td valign="top">
 
-Preview the plan:
+## First run â€” do not skip the plan
 
-```bash
+### Step 1 â€” Plan
+
+The plan shows:
+
+- selected connection UUID
+- selected device
+- current and target zones
+- name-resolution policy
+- the exact plan hash
+- what is intentionally not changed
+
+If the selected connection is not the one you expect, stop.
+
+</td>
+<td valign="top">
+
+## Ä°lk Ã§alÄ±ÅŸtÄ±rma â€” planÄ± atlamayÄ±n
+
+### AdÄ±m 1 â€” Plan
+
+Plan ÅŸunlarÄ± gÃ¶sterir:
+
+- seÃ§ilen baÄŸlantÄ± UUID'si
+- seÃ§ilen cihaz
+- mevcut ve hedef zone'lar
+- isim Ã§Ã¶zÃ¼mleme politikasÄ±
+- tam plan hash'i
+- bilinÃ§li olarak deÄŸiÅŸtirilmeyenler
+
+SeÃ§ilen baÄŸlantÄ± beklediÄŸiniz baÄŸlantÄ± deÄŸilse durun.
+
+</td>
+</tr>
+</table>
+
+~~~bash
 sudo /usr/bin/bash -p -- "$AEGIS_NET" plan
-```
+~~~
 
-Read the selected connection, device, zones, and plan hash.
+<table>
+<tr>
+<th width="50%">ENGLISH</th>
+<th width="50%">TÃœRKÃ‡E</th>
+</tr>
+<tr>
+<td valign="top">
 
-If the plan is correct:
+### Step 2 â€” Apply
 
-```bash
+<code>apply</code> creates a transaction snapshot and starts an independent rollback guard before publishing the network changes.
+
+If verification succeeds, the transaction is committed and the guard is cancelled.
+
+This is why you should not manually edit the AEGIS firewalld files during an active transaction.
+
+</td>
+<td valign="top">
+
+### AdÄ±m 2 â€” Uygula
+
+<code>apply</code> aÄŸ deÄŸiÅŸikliklerini yayÄ±mlamadan Ã¶nce transaction snapshot oluÅŸturur ve baÄŸÄ±msÄ±z rollback guard baÅŸlatÄ±r.
+
+DoÄŸrulama geÃ§erse transaction commit edilir ve guard iptal edilir.
+
+Bu nedenle aktif transaction sÄ±rasÄ±nda AEGIS firewalld dosyalarÄ±nÄ± elle deÄŸiÅŸtirmeyin.
+
+</td>
+</tr>
+</table>
+
+~~~bash
 sudo /usr/bin/bash -p -- "$AEGIS_NET" apply
-```
+~~~
 
-Then verify:
+<table>
+<tr>
+<th width="50%">ENGLISH</th>
+<th width="50%">TÃœRKÃ‡E</th>
+</tr>
+<tr>
+<td valign="top">
 
-```bash
+### Step 3 â€” Verify
+
+A successful <code>verify</code> checks:
+
+- managed configuration files
+- firewalld zones
+- profile binding
+- the strict DNAT gate
+- managed sysctls
+- connected device/default-route expectations
+
+Then reboot once and verify again. Reboot verification is important because persistent network/sysctl behavior can differ from the first live apply.
+
+</td>
+<td valign="top">
+
+### AdÄ±m 3 â€” DoÄŸrula
+
+BaÅŸarÄ±lÄ± <code>verify</code> ÅŸunlarÄ± kontrol eder:
+
+- yÃ¶netilen yapÄ±landÄ±rma dosyalarÄ±
+- firewalld zone'larÄ±
+- profil baÄŸlantÄ±sÄ±
+- sÄ±kÄ± DNAT kapÄ±sÄ±
+- yÃ¶netilen sysctl'ler
+- baÄŸlÄ± cihaz/default-route beklentileri
+
+Sonra bir kez reboot edip tekrar verify Ã§alÄ±ÅŸtÄ±rÄ±n. Reboot doÄŸrulamasÄ± Ã¶nemlidir; kalÄ±cÄ± aÄŸ/sysctl davranÄ±ÅŸÄ± ilk canlÄ± apply'dan farklÄ± olabilir.
+
+</td>
+</tr>
+</table>
+
+~~~bash
 sudo /usr/bin/bash -p -- "$AEGIS_NET" verify
-```
 
-Reboot once and run `verify` again.
+sudo systemctl reboot
+~~~
 
-### 4. Normal use
+After login / Oturum aÃ§tÄ±ktan sonra:
 
-No daily command is required.
+~~~bash
+AEGIS_NET=/usr/local/libexec/aegis/network-hardening/aegis-network.sh
+
+sudo /usr/bin/bash -p -- "$AEGIS_NET" verify
+~~~
+
+A successful result ends with / BaÅŸarÄ±lÄ± sonuÃ§ ÅŸununla biter:
+
+~~~text
+VERIFIED: AEGIS zones, profile binding, strict DNAT gate and managed sysctls are active/persistent.
+~~~
+
+<table>
+<tr>
+<th width="50%">ENGLISH</th>
+<th width="50%">TÃœRKÃ‡E</th>
+</tr>
+<tr>
+<td valign="top">
+
+## Daily use
+
+No daily <code>apply</code> is required.
 
 Useful checks:
 
-```bash
+- <code>verify</code> â€” full layer verification
+- <code>status</code> â€” current managed state
+- <code>history</code> â€” transaction history
+
+On a compliant system, another <code>apply</code> should report <code>NO-OP</code> and should not rewrite files or reload the firewall.
+
+</td>
+<td valign="top">
+
+## GÃ¼nlÃ¼k kullanÄ±m
+
+Her gÃ¼n <code>apply</code> Ã§alÄ±ÅŸtÄ±rÄ±lmaz.
+
+FaydalÄ± kontroller:
+
+- <code>verify</code> â€” katmanÄ±n tam doÄŸrulamasÄ±
+- <code>status</code> â€” mevcut yÃ¶netilen durum
+- <code>history</code> â€” transaction geÃ§miÅŸi
+
+Uyumlu sistemde yeni bir <code>apply</code>, <code>NO-OP</code> vermeli ve dosya yazmamalÄ± veya firewall reload yapmamalÄ±dÄ±r.
+
+</td>
+</tr>
+</table>
+
+~~~bash
 sudo /usr/bin/bash -p -- "$AEGIS_NET" verify
 sudo /usr/bin/bash -p -- "$AEGIS_NET" status
-```
+sudo /usr/bin/bash -p -- "$AEGIS_NET" history
+~~~
 
-A second `apply` on an already-correct system should report `NO-OP`.
+<table>
+<tr>
+<th width="50%">ENGLISH</th>
+<th width="50%">TÃœRKÃ‡E</th>
+</tr>
+<tr>
+<td valign="top">
 
-### 5. Commands
+## Command guide
 
-- `verify-install` â€” checks the installed script copy.
-- `audit` â€” read-only network/firewall inspection.
-- `plan` â€” shows what would change.
-- `apply` â€” applies the reviewed network policy.
-- `verify` â€” checks zones, profile binding, nftables gate, and sysctls.
-- `status` â€” shows the current managed state.
-- `history` â€” lists transactions.
-- `rollback [TX_ID]` â€” restores a previous transaction.
-- `packages` â€” shows required/optional tools.
-- `export` â€” exports a private audit report.
+- <code>verify-install</code> â€” verify installed script integrity
+- <code>audit</code> â€” read-only network/firewall inspection
+- <code>plan</code> â€” preview the policy
+- <code>apply</code> â€” apply the reviewed policy
+- <code>verify</code> â€” verify live and persistent state
+- <code>status</code> â€” show current managed state
+- <code>history</code> â€” list transactions
+- <code>rollback [TX_ID]</code> â€” restore a transaction
+- <code>packages</code> â€” show required/optional tools
+- <code>export</code> â€” create a private audit report
 
-### 6. If something goes wrong
+</td>
+<td valign="top">
 
-If `plan` says Docker is active, stop Docker first or wait for the separate Docker-isolation layer. Do not bypass this safety check.
+## Komut rehberi
 
-If more than one physical connection is active, list them:
+- <code>verify-install</code> â€” kurulu script bÃ¼tÃ¼nlÃ¼ÄŸÃ¼nÃ¼ doÄŸrular
+- <code>audit</code> â€” salt okunur aÄŸ/firewall incelemesi
+- <code>plan</code> â€” politikayÄ± Ã¶nceden gÃ¶sterir
+- <code>apply</code> â€” incelenen politikayÄ± uygular
+- <code>verify</code> â€” canlÄ± ve kalÄ±cÄ± durumu doÄŸrular
+- <code>status</code> â€” mevcut yÃ¶netilen durumu gÃ¶sterir
+- <code>history</code> â€” transaction kayÄ±tlarÄ±nÄ± listeler
+- <code>rollback [TX_ID]</code> â€” transaction'Ä± geri alÄ±r
+- <code>packages</code> â€” gerekli/opsiyonel araÃ§larÄ± gÃ¶sterir
+- <code>export</code> â€” Ã¶zel audit raporu Ã¼retir
 
-```bash
+</td>
+</tr>
+</table>
+
+## Multiple active connections / Birden fazla aktif baÄŸlantÄ±
+
+If the script cannot safely choose one physical connection / Betik tek fiziksel baÄŸlantÄ±yÄ± gÃ¼venle seÃ§emiyorsa:
+
+~~~bash
 nmcli -t -f NAME,UUID,TYPE,DEVICE \
   connection show --active
-```
+~~~
 
-Then choose the intended UUID:
+Then pass the intended UUID / Sonra doÄŸru UUID'yi verin:
 
-```bash
+~~~bash
 sudo /usr/bin/bash -p -- "$AEGIS_NET" plan \
   --connection-uuid YOUR_UUID
-```
+~~~
 
-For recovery:
+<table>
+<tr>
+<th width="50%">ENGLISH</th>
+<th width="50%">TÃœRKÃ‡E</th>
+</tr>
+<tr>
+<td valign="top">
 
-```bash
+## Troubleshooting
+
+**Plan says Docker is active**  
+Stop Docker or wait for the separate Docker-isolation layer. Do not bypass the safety check.
+
+**The wrong physical connection was selected**  
+Use <code>--connection-uuid</code> with the UUID you reviewed.
+
+**Internet works but a local service no longer accepts inbound connections**  
+That may be intentional. This policy does not expose SSH/Samba or broad high ports.
+
+**Printer discovery**  
+The LAN policy keeps mDNS, IPP-client, and WS-Discovery-client. A real printer still needs a functional CUPS/printer setup.
+
+**Verify fails after reboot**  
+Run <code>status</code>, <code>history</code>, and <code>plan</code>. Do not start editing firewalld XML manually.
+
+</td>
+<td valign="top">
+
+## Sorun giderme
+
+**Plan Docker'Ä±n aktif olduÄŸunu sÃ¶ylÃ¼yor**  
+Docker'Ä± durdurun veya ayrÄ± Docker-isolation katmanÄ±nÄ± bekleyin. GÃ¼venlik kontrolÃ¼nÃ¼ atlamayÄ±n.
+
+**YanlÄ±ÅŸ fiziksel baÄŸlantÄ± seÃ§ildi**  
+Ä°ncelediÄŸiniz UUID ile <code>--connection-uuid</code> kullanÄ±n.
+
+**Internet Ã§alÄ±ÅŸÄ±yor ama yerel bir servis inbound baÄŸlantÄ± kabul etmiyor**  
+Bu bilinÃ§li olabilir. Politika SSH/Samba veya geniÅŸ yÃ¼ksek portlarÄ± aÃ§maz.
+
+**YazÄ±cÄ± keÅŸfi**  
+LAN politikasÄ± mDNS, IPP-client ve WS-Discovery-client servislerini korur. GerÃ§ek yazÄ±cÄ± iÃ§in Ã§alÄ±ÅŸan CUPS/yazÄ±cÄ± kurulumu ayrÄ±ca gerekir.
+
+**Verify reboot sonrasÄ± geÃ§miyor**  
+<code>status</code>, <code>history</code> ve <code>plan</code> Ã§alÄ±ÅŸtÄ±rÄ±n. firewalld XML dosyalarÄ±nÄ± elle dÃ¼zenlemeye baÅŸlamayÄ±n.
+
+</td>
+</tr>
+</table>
+
+## Rollback / Geri alma
+
+List transactions / Ä°ÅŸlemleri listeleyin:
+
+~~~bash
 sudo /usr/bin/bash -p -- "$AEGIS_NET" history
+~~~
+
+Rollback a transaction / Bir transaction'Ä± geri alÄ±n:
+
+~~~bash
 sudo /usr/bin/bash -p -- "$AEGIS_NET" rollback TX_ID
-```
+~~~
 
-Do not manually delete the AEGIS firewalld zones while a transaction is active.
+<table>
+<tr>
+<th width="50%">ENGLISH</th>
+<th width="50%">TÃœRKÃ‡E</th>
+</tr>
+<tr>
+<td valign="top">
 
----
+## What this layer does not do
 
-## TÃ¼rkÃ§e
+- It does not create an outbound application allowlist.
+- It does not claim DNS-over-TLS.
+- It does not automatically start Docker.
+- It does not disable all ICMP.
+- It does not turn the laptop into a router.
+- It does not replace application-level security.
 
-### 1. BaÅŸlamadan Ã¶nce
+</td>
+<td valign="top">
 
-Bu katmanÄ± yalnÄ±z ÅŸu durumda kullanÄ±n:
+## Bu katman ne yapmaz?
 
-- Fedora 44 normal Ã§alÄ±ÅŸÄ±yor.
-- `firewalld` ve NetworkManager active.
-- kurtarma hÃ§Špå•É•°µ…ÏñÍÓğ½QQd½ÑÕÉÕµÔÙ…È¸(´…ÁÁ±å€ÏÅÉ…ÏÅ¹‘„½­•È…­Ñ¥˜‘—}¥°¸(+Y¹•µ±¤è¥¹‰½Õ¹MM Ù”M…µ‰„Á…å±‡Å´Ä‰ÔÁ½±¥Ñ¥­…‘„‰¥±¥»±¤½±…É…¬‡ŸÅ±µ…è¸e…ëÅÄ­—}™¤½¥ÍÑ•µ¤ÑÉ…™§}¤­½ÉÕ¹ÕÈ¸((ŒŒŒ€È¸-ÕÉÕ±Õ´()Q•Éµ¥¹…±¤‰Ô­±…ÏÙÉ‘”‡ŸÅ¸è()‰…Í )Í¡„ÈÔÙÍÕ´€µŒM!ÈÔÙMU5L()ÍÕ‘¼¥¹ÍÑ…±°€µ€µ¼É½½Ğ€µœÉ½½Ğ€µ´€ÀÜÔÔp(€€½ÕÍÈ½±½…°½±¥‰•á•Œ½…•¥Ì½¹•Ñİ½É¬µ¡…É‘•¹¥¹œ()ÍÕ‘¼¥¹ÍÑ…±°€µ¼É½½Ğ€µœÉ½½Ğ€µ´€ÀÜÔÔp(€€¸½…•¥Ìµ¹•Ñİ½É¬¹Í p(€€½ÕÍÈ½±½…°½±¥‰•á•Œ½…•¥Ì½¹•Ñİ½É¬µ¡…É‘•¹¥¹œ½…•¥Ìµ¹•Ñİ½É¬¹Í ()ÍÕ‘¼É•ÍÑ½É•½¸€µIØp(€€½ÕÍÈ½±½…°½±¥‰•á•Œ½…•¥Ì½¹•Ñİ½É¬µ¡…É‘•¹¥¹œ)€()/ÅÍ„­Õ±±…»Å´‘—}§}­•¹¥¹¤Ñ…»Åµ±…çÅ¸è()‰…Í )%M}9Pô½ÕÍÈ½±½…°½±¥‰•á•Œ½…•¥Ì½¹•Ñİ½É¬µ¡…É‘•¹¥¹œ½…•¥Ìµ¹•Ñİ½É¬¹Í )€()-ÕÉÕ±Ô­½Áå…çÄ­½¹ÑÉ½°•‘¥¸è()‰…Í (½ÕÍÈ½‰¥¸½‰…Í €µÀ€´´€ˆ‘%M}9PˆÙ•É¥™äµ¥¹ÍÑ…±°)€((ŒŒŒ€Ì¸ƒÁ±¬­Õ±±…»Å´()A±…»ÄŸÙËñ¸è()‰…Í )ÍÕ‘¼€½ÕÍÈ½‰¥¸½‰…Í €µÀ€´´€ˆ‘%M}9PˆÁ±…¸)€()M—¥±•¸‰‡}±…¹ÓÅçÄ°¥¡…ëÄ°é½¹”±…ËÄÙ”Á±…¸¡…Í ¥¹¤½­ÕåÕ¸¸()A±…¸‘¿}ÉÕåÍ„è()‰…Í )ÍÕ‘¼€½ÕÍÈ½‰¥¸½‰…Í €µÀ€´´€ˆ‘%M}9Pˆ…ÁÁ±ä)€()M½¹É„è()‰…Í )ÍÕ‘¼€½ÕÍÈ½‰¥¸½‰…Í €µÀ€´´€ˆ‘%M}9PˆÙ•É¥™ä)€()	¥È­•èÉ•‰½½Ğ•‘¥¸Ù”Ù•É¥™å€­½µÕÑÕ¹ÔÑ•­É…Èƒ…³Ç}ÓÅËÅ¸¸((ŒŒŒ€Ğ¸ñ¹³ñ¬­Õ±±…»Å´()!•ÈŸñ¸­½µÕĞƒ…³Ç}ÓÅÉµ…»Åè•É•­µ•è¸()…å‘…³Ä­½¹ÑÉ½±±•Èè()‰…Í )ÍÕ‘¼€½ÕÍÈ½‰¥¸½‰…Í €µÀ€´´€ˆ‘%M}9PˆÙ•É¥™ä)ÍÕ‘¼€½ÕÍÈ½‰¥¸½‰…Í €µÀ€´´€ˆ‘%M}9PˆÍÑ…ÑÕÌ)€()M¥ÍÑ•´é…Ñ•¸‘¿}ÉÕåÍ„¥­¥¹¤…ÁÁ±å€9<µ=A€Ù•Éµ•±¥‘¥È¸((ŒŒŒ€Ô¸-½µÕÑ±…È((´Ù•É¥™äµ¥¹ÍÑ…±±€ƒŠP­ÕÉÕ±ÔÍÉ¥ÁĞ­½Áå…ÏÅ»Ä‘¿}ÉÕ±…È¸(´…Õ‘¥Ñ€ƒŠPÍ…±Ğ½­Õ¹ÕÈ¹•Ñİ½É¬½™¥É•İ…±°¥¹•±•µ•Í¤¸(´Á±…¹€ƒŠP¹”‘—}§}•—}¥¹¤ŸÙÍÑ•É¥È¸(´…ÁÁ±å€ƒŠP¥¹•±•¹•¸¹•Ñİ½É¬Á½±¥Ñ¥­…ÏÅ»ÄÕåÕ±…È¸(´Ù•É¥™å€ƒŠPé½¹”°ÁÉ½™¥°‰‡Ä°¹™Ñ…‰±•Ì­…ÃÅÏÄÙ”ÍåÍÑ°±•É¤‘¿}ÉÕ±…È¸(´ÍÑ…ÑÕÍ€ƒŠPçÙ¹•Ñ¥±•¸µ•ÙÕĞ‘ÕÉÕµÔŸÙÍÑ•É¥È¸(´¡¥ÍÑ½Éå€ƒŠPÑÉ…¹Í…Ñ¥½¸­…çÅÑ±…ËÅ»Ä±¥ÍÑ•±•È¸(´É½±±‰…¬mQa}%u€ƒŠPƒÙ¹•­¤ÑÉ…¹Í…Ñ¥½¸ŸÄ•É¤…³ÅÈ¸(´Á…­…•Í€ƒŠP•É•­±¤½½ÁÍ¥å½¹•°…É‡±…ËÄŸÙÍÑ•É¥È¸(´•áÁ½ÉÑ€ƒŠPƒÙé•°‰¥È…Õ‘¥ĞÉ…Á½ÉÔƒñÉ•Ñ¥È¸((ŒŒŒ€Ø¸M½ÉÕ¸½±ÕÉÍ„()Á±…¹€½­•ÈŸÅ¸…­Ñ¥˜½±‘×}Õ¹ÔÏÙå³ñå½ÉÍ„½­•ÈŸÄ‘ÕÉ‘ÕÉÕ¸Ù•å„…åËÄ½­•Èµ¥Í½±…Ñ¥½¸­…Ñµ…»Å»Ä‰•­±•å¥¸¸	ÔŸñÙ•¹±¥¬­½¹ÑÉ½³ñ»ğ…Ñ±…µ…çÅ¸¸()	¥É‘•¸™…é±„™¥é¥­Í•°‰‡}±…¹ÓÄ…­Ñ¥™Í”è()‰…Í )¹µ±¤€µĞ€µ˜95±UU%±QeA±Y%p(€½¹¹•Ñ¥½¸Í¡½Ü€´µ…Ñ¥Ù”)€()¿}ÉÔUU%å¤Í—¥¸è()‰…Í )ÍÕ‘¼€½ÕÍÈ½‰¥¸½‰…Í €µÀ€´´€ˆ‘%M}9PˆÁ±…¸p(€€´µ½¹¹•Ñ¥½¸µÕÕ¥e=UI}UU%)€()I•½Ù•Éä§¥¸è()‰…Í )ÍÕ‘¼€½ÕÍÈ½‰¥¸½‰…Í €µÀ€´´€ˆ‘%M}9Pˆ¡¥ÍÑ½Éä)ÍÕ‘¼€½ÕÍÈ½‰¥¸½‰…Í €µÀ€´´€ˆ‘%M}9PˆÉ½±±‰…¬Qa}%)€()­Ñ¥˜ÑÉ…¹Í…Ñ¥½¸Ù…É­•¸%L™¥É•İ…±±é½¹”±…ËÅ»Ä•±±”Í¥±µ•å¥¸¸((ø	Ô­…Ñµ…¸Í—¥±¤¥¹‰½Õ¹Í…±“ÅËÄçñé•å±•É¥¹¤…é…±ÓÅÈ¸UåÕ±…µ„Í•Ù¥å•Í¥¹‘”½ÕÑ‰½Õ¹…±±½İ±¥ÍĞ½±×}ÑÕÉµ…è¸(
+- Uygulama bazlÄ± outbound allowlist oluÅŸturmaz.
+- DNS-over-TLS kullandÄ±ÄŸÄ±nÄ± iddia etmez.
+- Docker'Ä± otomatik baÅŸlatmaz.
+- TÃ¼m ICMP'yi kapatmaz.
+- DizÃ¼stÃ¼ bilgisayarÄ± router'a dÃ¶nÃ¼ÅŸtÃ¼rmez.
+- Uygulama seviyesindeki gÃ¼venliÄŸin yerini almaz.
+
+</td>
+</tr>
+</table>
+
+## What you learned / Ne Ã¶ÄŸrendiniz?
+
+<table>
+<tr>
+<th width="50%">ENGLISH</th>
+<th width="50%">TÃœRKÃ‡E</th>
+</tr>
+<tr>
+<td valign="top">
+
+A firewall is not simply â€œonâ€ or â€œoffâ€.
+
+You learned to think in terms of:
+
+**trust zone â†’ allowed services â†’ interface binding â†’ verification â†’ rollback**
+
+</td>
+<td valign="top">
+
+Firewall yalnÄ±zca â€œaÃ§Ä±kâ€ veya â€œkapalÄ±â€ deÄŸildir.
+
+Åu modelle dÃ¼ÅŸÃ¼nmeyi Ã¶ÄŸrendiniz:
+
+**gÃ¼ven zone'u â†’ izinli servisler â†’ interface baÄŸlantÄ±sÄ± â†’ doÄŸrulama â†’ rollback**
+
+</td>
+</tr>
+</table>
