@@ -6,7 +6,14 @@
 - Added seven focused mocked regressions for empty/multiple/trusted interface sets, precheck-before-load and fail-closed parser behavior.
 - Retained nine review4 session/zone regressions and original strict TTY audit gate.
 - Passed live Fedora 44 preflight, physical-TTY `apply` → `COMMITTED`, explicit `verify` → `VERIFIED`, and normal-session monitoring → `INFO`.
-- Post-apply service check passed; reboot and optional-feature acceptance remain pending.
+- Post-apply service check **and one physical Fedora reboot persistence check** passed: `VERIFIED`, monitor `INFO`, five active services/units, `inet firewalld` + `inet aegis_sentinel`, working DNS, and zero failed units. Optional-feature acceptance remains pending.
+
+### GitHub documentation and privacy hardening (2026-11-21)
+
+- Published a fully bilingual two-column English/Turkish command reference and independent Arabic manual, each covering every CLI subcommand, user/systemd entrypoint, switch, examples and expected output markers.
+- Added five automated documentation/manifest/privacy contract tests to the offline suite and preflight.
+- Replaced a real machine-specific Wi-Fi interface name in a **non-mutating synthetic `nft --check` fixture** with portable `eth0`.
+- **Runtime `aegis-firewall-sentinel.py` unchanged**; only publication/documentation, tests and preflight fixture changed.
 
 ## 0.9.0-alpha2-review4
 
