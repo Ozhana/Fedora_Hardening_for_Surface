@@ -1,5 +1,7 @@
 # Fedora 44 installation and acceptance (EN)
 
+The fully bilingual command-by-command reference is [README.md](../README.md); the standalone Arabic manual is [README_AR.md](../README_AR.md). Both include expected output and risk level for every CLI command.
+
 ## Requirements
 
 Fedora 44 mutable Workstation; physical access to a Linux VT/TTY; regular user with `sudo`; working `firewalld`, `nftables`, NetworkManager and systemd; **installed and verified** AEGIS Network Hardening `0.7.0-rc4` from the sibling `04-Network-Hardening`. Do not install solely over SSH or remote desktop. Prefer a maintenance window and a physical keyboard.
@@ -50,4 +52,4 @@ Require `VERIFIED:` and exit 0. Then return to desktop and run the post-apply ch
 
 For upgrades verify the *new* source and installed runtime hash, run preflight, review `plan`, re-apply only from an active physical VT and re-verify. The installer does not unconditionally uninstall or clear policies. For drift, failure, manual rollback or recovery commands, see [SECURITY_AND_RECOVERY.md](SECURITY_AND_RECOVERY.md).
 
-**Reboot persistence has not yet passed a field acceptance test.** It must be tested separately on physical Fedora hardware, with post-boot `verify`, `monitor-now`, NetworkManager, DNS, and printer checks.
+**Post-reboot field result (2026-11-21): PASS on one Fedora 44 Surface Pro 9.** Independent `verify` returned VERIFIED, monitor INFO, all five critical systemd units active, both nftables tables present, DNS resolving and zero failed units. Future upgrades still require their own reboot checks. Physical printing remains untested.
