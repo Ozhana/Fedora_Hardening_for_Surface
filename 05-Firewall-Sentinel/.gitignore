@@ -1,0 +1,16 @@
+# Editor, build and local runtime artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+*.log
+*.tmp
+*.swp
+.DS_Store
+# Never commit machine-local AEGIS state or credentials
+private/
+state/
+transactions/
+*secret*
+*credentials*
