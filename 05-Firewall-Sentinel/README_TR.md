@@ -3,9 +3,11 @@
 **Sürüm:** `0.9.0-alpha2-review5` (STRICT)  
 **Hedef:** Fedora 44 Workstation, systemd + firewalld + nftables  
 **Ön koşul:** [04 — AEGIS Network Hardening](../04-Network-Hardening) sürüm `0.7.0-rc4`  
+**Ayrıntılı, komut-komut yan yana İngilizce–Türkçe ana kılavuz:** [README.md](README.md) · **Bağımsız Arapça:** [README_AR.md](README_AR.md)
+
 **Ayrıntılar:** [Kurulum](docs/INSTALL_TR.md) · [Günlük kullanım](docs/OPERATIONS.md) · [Güvenlik ve geri alma](docs/SECURITY_AND_RECOVERY.md)
 
-> **Durum: Gerçek Fedora üzerinde kurulumu doğrulanmış ALPHA.** 21 Kasım 2026'da gerçek fiziksel TTY'de `COMMITTED`, ardından ayrıca `VERIFIED` alındı; grafik masaüstünden `monitor-now` sonucu `INFO` idi. **Yeniden başlatma sonrası kalıcılık, gerçek yazıcıya baskı, strict DoT, VPN kill-switch, karantina ve acil müdahale komutları henüz sınanmadı.**
+> **Durum: Gerçek Fedora üzerinde kurulumu doğrulanmış ALPHA.** 21 Kasım 2026'da gerçek fiziksel TTY'de `COMMITTED`, ardından ayrıca `VERIFIED` alındı; grafik masaüstünden `monitor-now` sonucu `INFO` idi. **21 Kasım 2026 tarihinde reboot sonrası doğrulama da başarılı oldu. Gerçek yazıcıya baskı, strict DoT, VPN kill-switch, karantina ve acil müdahale komutları hâlâ saha testinden geçmedi.**
 
 ## Sentinel ne yapar?
 
@@ -57,4 +59,4 @@ Systemd `aegis-firewall-sentinel.service` için `active (exited)` tek başına h
 
 **Notlar:** `monitor-now` üzerindeki 5353 Avahi / 5355 resolved wildcard socket `INFO` mesajları tek başına dış ağ erişimi veya güvenlik açığı kanıtı değildir. İhtiyaç duymadan `network-gate`, `runtime-load`, `trust-sync`, `panic-off` gibi servis/iç kullanım komutlarını elle çalıştırma. Diğer müdahale komutları için [işletim rehberi](docs/OPERATIONS.md) gerekir.
 
-[İngilizce README](README.md) · [Tam kurulum](docs/INSTALL_TR.md) · [Kanıtlar ve bilinen sınırlamalar](docs/FIELD_ACCEPTANCE.md)
+[Yan yana EN–TR tam kılavuz](README.md) · [Arapça tam kılavuz](README_AR.md) · [Tam kurulum](docs/INSTALL_TR.md) · [Kanıtlar ve bilinen sınırlamalar](docs/FIELD_ACCEPTANCE.md)
