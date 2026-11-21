@@ -22,7 +22,7 @@
 | CUPS / Avahi | `active (running)` |
 | Printer destinations | none configured after clean Fedora installation |
 | Actual physical printing | NOT TESTED |
-| Reboot persistence | **NOT TESTED** |
+| Reboot persistence | **PASS: one Fedora 44 reboot (2026-11-21)**; `verify` VERIFIED, monitor INFO; five units active; both nft tables present; resolver working; zero failed systemd units |
 | Optional strict DoT/VPN/quarantine/active response | NOT TESTED |
 
 ## Root-cause history
@@ -33,4 +33,15 @@
 
 ## Evidence boundary
 
-`COMMITTED` + `VERIFIED` confirms the policy files, runtime table, sealed manifest and base network layer in the observed boot. It does **not** prove every packet flow, printer workflow, DNS privacy or boot persistence under all conditions. Do not market this alpha as production-certified.
+`COMMITTED` + `VERIFIED` confirms the policy files, runtime table, sealed manifest and base network layer in the observed boot. It does **not** prove every packet flow, printer workflow, DNS privacy or boot persistence under all conditions. One successful reboot has been observed, not a cross-hardware guarantee. Do not market this alpha as production-certified.
+
+## Reboot field evidence (independently reported)
+
+- `verify`: `VERIFIED: base Network Hardening, Sentinel egress policy, manifest, quarantine state, units, and runtime table match.`
+- `monitor-now`: `AEGIS Firewall Sentinel monitor: INFO` (wildcard socket observations only; no CRITICAL).
+- `systemctl is-active`: five `active` lines for Sentinel policy/monitor timer/path, NetworkManager, firewalld.
+- `sudo nft list tables`: `table inet firewalld` and `table inet aegis_sentinel`.
+- `resolvectl query example.org`: successful resolution, **not encrypted transport**.
+- `systemctl --failed --no-pager`: `0 loaded units listed.`
+- `journalctl`: NetworkManager warned about setting IPv4 forwarding to `0` on a P2P device despite showing `Success`; root cause unverified, no functional outage observed.
+- CUPS/Avahi remained healthy in earlier checks; no actual printer queue or physical printing test.
