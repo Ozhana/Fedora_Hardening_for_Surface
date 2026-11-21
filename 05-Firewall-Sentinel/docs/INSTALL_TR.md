@@ -8,6 +8,8 @@
 - Güncel ağ erişimini, önemli VPN/yazıcı ihtiyaçlarını ve planlı bir bakım penceresini kontrol edin.
 - Daha önce yarım kalmış `apply` varsa transaction `status` ve `rollback.reason`, `policy.json`, nftables tabloları ve `NetworkManager` durumunu inceleyin. Durumu belirsiz makineye yeniden `apply` çalıştırmayın.
 
+**Eksiksiz komut ve beklenen çıktı referansı:** [Yan yana İngilizce–Türkçe ana kılavuz](../README.md) · [Ayrı Arapça kılavuz](../README_AR.md).
+
 ## 1. Kaynağı al ve offline doğrula
 
 ```bash
@@ -67,4 +69,4 @@ Yeni kaynak paketinin checksumlarını doğrulayın ve **yalnızca onaylı yeni 
 
 ## 6. Reboot kabul testi
 
-**21 Kasım 2026 itibarıyla henüz uygulanmadı.** Yeniden başlatma, NetworkManager başlangıç gate kontrolü nedeniyle bağlantı kaybı riski taşır. Fiziksel konsol erişimini doğrulayıp işleri kaydederek, bakım penceresinde reboot edin. Açılışta `verify`, `monitor-now`, `systemctl --failed`, `NetworkManager`, DNS ve yazıcı testlerini tekrarlayın. Başarılı sonuç olmadan kalıcılığı doğrulandı demeyin.
+**21 Kasım 2026 tarihinde Fedora 44 Surface Pro 9 üzerinde bir yeniden başlatma kabul testi başarıyla tamamlandı.** `verify`: VERIFIED; `monitor-now`: INFO; beş ilgili systemd birimi active; `inet firewalld` ve `inet aegis_sentinel` tabloları mevcut; DNS çözümleme başarılı; failed unit sayısı 0. Bu sonuç, başka makinelerde ve gelecekteki yükseltmelerde otomatik garanti değildir. Gerçek yazıcıya baskı testi hâlâ yapılmadı.
