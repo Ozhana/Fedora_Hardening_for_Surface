@@ -18,6 +18,7 @@ printf '\n[2/8] OFFLINE REGRESSIONS\n'
 /usr/bin/python3 -I tests/test_static.py
 /usr/bin/python3 -I tests/test_review4_regressions.py
 /usr/bin/python3 -I tests/test_review5_regressions.py
+/usr/bin/python3 -I tests/test_documentation_contract.py
 
 printf '\n[3/8] SUDO AUTHORIZATION\n'
 sudo -v
@@ -28,7 +29,7 @@ sudo /usr/sbin/nft --check --file - <<'AEGIS_NFT_SYNTAX'
 add table inet aegis_review5_syntax_probe
 add set inet aegis_review5_syntax_probe trusted_ifaces { type ifname; }
 flush set inet aegis_review5_syntax_probe trusted_ifaces
-add element inet aegis_review5_syntax_probe trusted_ifaces { "wlp0s20f3" }
+add element inet aegis_review5_syntax_probe trusted_ifaces { "eth0" }
 AEGIS_NFT_SYNTAX
 
 printf '\n[5/8] ATOMIC ROOT-OWNED RUNTIME REPLACEMENT\n'
