@@ -1,5 +1,7 @@
 # Operations — commands and expected behavior
 
+**Complete command/flag catalog with exact or conditional expected outputs:** [English–Turkish two-column README](../README.md) · [Arabic manual](../README_AR.md).
+
 **This is an alpha security tool.** Routine read-only monitoring may run from a GUI terminal. Destructive or connectivity-changing actions are **not** routine checks. Review `--help`, make a current plan and use a physical TTY where required.
 
 ## Everyday verification / Günlük denetim
@@ -54,4 +56,4 @@ systemctl --failed --no-pager
 systemctl show NetworkManager.service -p ActiveState -p SubState -p Result
 ```
 
-Review logs before posting them publicly; network UUIDs, interface identifiers and private addresses can be present. Read-only checks do not substitute for reboot persistence or physical printer tests.
+Review logs before posting them publicly; network UUIDs, interface identifiers and private addresses can be present. One physical Fedora 44 reboot persistence test passed on 2026-11-21; read-only checks do not substitute for repeated platform testing or a real physical printer test.
