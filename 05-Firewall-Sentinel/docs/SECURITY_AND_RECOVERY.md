@@ -8,9 +8,11 @@
 4. **Rollback boundary:** apply stores transaction snapshots, schedules a temporary guard and runs post-apply verification and manifest sealing before committing. Failed apply attempts *attempt* automatic restore. Inspect proof of rollback; never assume a failed start is harmless.
 5. **Trust boundary for network identity:** trusted LAN is dynamically selected from the reviewed NetworkManager connection UUID. Do not hard-code a user's UUID in public examples or tests.
 
+**Emergency trust boundary:** `quarantine-on --force-emergency` and `panic-off` use a distinct weaker interactive-TTY/loginuid break-glass check rather than the full active-logind-session audit gate. Neither has been field-accepted. This distinction is intentional and must not be hidden by documentation.
+
 ## What is NOT proven
 
-- Reboot persistence and NetworkManager start-order recovery on real hardware were **not tested** as of 2026-11-21.
+- One real-hardware Fedora 44 reboot **passed** as of 2026-11-21 (VERIFIED, monitor INFO, five active units, both nftables tables, DNS working, zero failed units). Broader boot-order failure injection and multiple-hardware persistence remain **untested**.
 - No verified actual printing after applying Sentinel. CUPS and Avahi service health is not a printer functional test.
 - `strict-dot-resolver` rejected preflight on the field host; current DNS is resolved through LAN infrastructure with systemd-resolved DoT disabled and DNSSEC unsupported. Direct DNS port 53 remains `PASSTHROUGH`.
 - VPN kill-switch, persistent quarantine, emergency panic, blocklist and cgroup isolation remain experimental; none should be inferred safe from a base `apply`/`verify` PASS.
@@ -37,7 +39,7 @@ A generic `sudo systemctl restart NetworkManager` is **not** a rollback and can 
 
 ## Open items before stable release
 
-- Perform a guarded hardware reboot with post-boot `verify`, `monitor-now`, dns + printer checks.
+- Repeat guarded hardware reboot after any future release/upgrade; post-boot `verify`, `monitor-now`, DNS, service order and physical printer checks remain required per target host.
 - Confirm printing with an actually configured printer; retain CUPS/Avahi unless separately reviewed.
 - Adversarially test NetworkManager restarts, disconnections/reconnections, foreign hook drift, and counter/watcher behavior.
 - Separately validate each opt-in mode (DoT, VPN, quarantine, blocklist, cgroup) before considering it production-ready.
